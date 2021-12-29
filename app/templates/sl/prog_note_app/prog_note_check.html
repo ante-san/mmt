@@ -1,0 +1,27 @@
+{% extends 'sl/templates/sl_template.html' %}
+
+{% block title %}Progress Note Check{% endblock title %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light"">
+    <div class="row">
+        <div class="col">
+            <h1 class="mmt-h1">Progress Note Check</h1>
+            <hr>
+            <form action="/progress_note_result" method="POST" enctype="multipart/form-data">
+                <label for="cctr">Select Cost Centre</label>
+                <select name="cctr" id="cctr" class="form-control">
+                    <option value="302 - Mentoring Services">302 - Mentoring Services</option>
+                    <option value="194 - In Home Support">194 - In Home Support</option>
+                </select>
+                <label for="roster_file">Roster File:</label>
+                <input type="file" class="form-control" name="roster_file" required>
+                <label for="prog_note_file">Progress Note File:</label>
+                <input type="file" class="form-control" name="prog_note_file" required>
+                <br>
+                <button type="submit" class="form-control btn-primary">Run Report</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main %}

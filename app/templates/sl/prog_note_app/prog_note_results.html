@@ -1,0 +1,45 @@
+{% extends 'sl/templates/sl_template.html' %}
+
+{% block title %}Progress Note Check - Results{% endblock title %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light"">
+    <div class=" row">
+        <div class="col">
+            <h1 class="mmt-h1">Progress Note Check - Results</h1>
+            <hr>
+            <table class="table table-striped table-hover">
+                {% for i, row in roster.iterrows() %}
+                <tr id="row-{{ i }}" class="prog_note_row">
+                    <td>{{ row["ClientFullName"] }}</td>
+                    <td>{{ row["AllocatedStaff"] }}</td>
+                    <td>{{ row["RosterStartDateTime"]}}</td>
+                    <td>{{ row["RosterEndDateTime"]}}</td>
+                    <td>{{ row["ValidProgNoteComplete"] }}</td>
+                    <td>
+                        {% if row["ValidProgNoteComplete"] == "Missing" %}
+                        <a
+                            href="mailto:{{ row['Email']}}?cc=mentoringsupports@minda.asn.au&subject=Missing%20Progress%20Note%20for%20{{ row['Client']}}%20on%20{{ row['ServiceDate'] }}
+                            &body=Hi {{ row['FirstName'] }},%0D%0A %0D%0ACould you please complete your Progress Note for {{ row['ClientFullName'] }} on {{ row['ServiceDate'] }}.%0D%0A %0D%0AIf you believe that you have entered this Progress Note, could you please verify that you have entered the correct Service Date.%0D%0A %0D%0AIf you have entered the incorrect Service Date by accident, could you please delete the incorrect Progress Note and re-enter it with the correct Service Date (copy-pasting the content is fine). %0D%0A %0D%0AThank you.
+                        " class="email-button" id="email-button-{{ i }}" onclick="emailSent(this.id)">Send Email</a>
+                        {% elif row["ValidProgNoteComplete"] == "Time Error" %}
+                        <a
+                            href="mailto:{{ row['Email']}}?cc=mentoringsupports@minda.asn.au&subject=Progress%20Note%20Timing%20for%20{{ row['Client']}}%20on%20{{ row['ServiceDate'] }}
+                            &body=Hi {{ row['FirstName'] }},%0D%0A %0D%0AThe time you've entered into the Progress Note for {{ row['ClientFullName'] }} on {{ row['ServiceDate'] }} does not match what we have in our roster.%0D%0A %0D%0ACould you please verify that you have entered the correct timings. If you did enter the correct timings, could you please confirm the actual times you worked.%0D%0A %0D%0AIf you entered the wrong times by accident (remember to use 24-h time), could you please delete the Progress Note and re-enter it with the correct timings (copy-pasting the content is fine).%0D%0A %0D%0AThank you.
+                            " class="email-button" id="email-button-{{ i }}" onclick="emailSent(this.id)">Send Email</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+    {{super()}}
+    <script src="{{ url_for('static', filename='js/prog_note_check.js') }}"></script>
+{% endblock scripts %}
+
+{% endblock main %}

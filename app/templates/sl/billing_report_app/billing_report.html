@@ -1,0 +1,50 @@
+<!-- prettier-ignore -->
+{% extends "sl/templates/sl_template.html" %}
+
+{% block title %}Billing Report{% endblock title %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light">
+    <div class="row">
+        <div class="col">
+            <h1 class="mmt-h1">Billing Report Generator</h1>
+            <hr>
+            {% if status_text %}
+            <div><h3>{{ status_text }}</h2></div>
+            {% endif %}
+            {% if return_file %}
+            <form action="{{ url_for('dl_report', filename=return_file)}}">
+                <button class="btn btn-success text-center" type="submit">Download Report</button>
+            </form>
+            <br>
+            {% endif %}
+            <form action="/billing_report" method="POST" enctype="multipart/form-data">
+                <div>
+                    <label for="cctr">Select Cost Centre</label>
+                    <select name="cctr" id="cctr" class="form-control">
+                        <option value="302 - Mentoring Services">302 - Mentoring Services</option>
+                        <option value="194 - In Home Support">194 - In Home Support</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="roster_file">Roster File:</label>
+                    <input type="file" class="form-control" name="roster_file">
+                </div>
+                <div>
+                    <label for="prog_file">Progress Note File:</label>
+                    <input type="file" class="form-control" name="prog_file">
+                </div>
+                <div>
+                    <br/>
+                    <button class="form-control btn-primary" type="submit" id="submit">Run Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock main %}
+
+<!-- prettier-ignore -->
+{% block scripts %}
+
+{% endblock scripts %}

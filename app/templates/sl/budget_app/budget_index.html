@@ -1,0 +1,42 @@
+{% extends 'sl/templates/sl_template.html' %}
+
+{% block title %}Budget Overview{% endblock title %}
+
+{% block main %}
+
+<div class="container p-3 mt-3 rounded-3 bg-light">
+    <div class="row">
+        <div class="col">
+            <h1 class="mmt-h1">Budget Overview</h1>
+            <hr>
+            <form action="/budget/result" method="POST" enctype="multipart/form-data">
+                <div>
+                    <div>
+                    <label for="cctr">Select Cost Centre</label>
+                    <select name="cctr" id="cctr" class="form-control">
+                        <option value="302 - Mentoring Services">302 - Mentoring Services</option>
+                        <option value="194 - In Home Support">194 - In Home Support</option>
+                    </select>
+                </div>
+                </div>
+                <div>
+                    <label for="billed">Billing File:</label>
+                    <input type="file" class="form-control" name="billed" required>
+                </div>
+                <div>
+                    <label for="budget">Budget File:</label>
+                    <input type="file" class="form-control" name="budget" required>
+                </div>
+                <div>
+                    <label for="scheduled">Schedule File:</label>
+                    <input type="file" class="form-control" name="scheduled" required>
+                </div>
+                <div>
+                    <br />
+                    <button class="form-control btn-primary" type="submit" id="submit">Run Report</button>
+                </div>
+        </div>
+    </div>
+</div>
+
+{% endblock main %}

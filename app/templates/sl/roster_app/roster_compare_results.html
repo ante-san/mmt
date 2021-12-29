@@ -1,0 +1,25 @@
+<!-- prettier-ignore -->
+{% extends "sl/templates/sl_template.html" %}
+
+{% block title %}Roster Comparison - Results{% endblock title %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light">
+    <div class="row">
+        <div class="col">
+            <h1 class="mmt-h1">Roster Comparison - Results</h1>
+            <hr>
+            {% if output_file %}
+            <button class="btn btn-success">Download Report</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock main %}
+
+
+{% block scripts %}
+
+{% endblock scripts %}

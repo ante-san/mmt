@@ -1,0 +1,15 @@
+<!-- prettier-ignore -->
+
+{% extends "sl/templates/sl_template.html" %}
+
+
+{% block info %}
+
+<!-- prettier-ignore -->
+{% endblock info %}
+
+
+{% block scripts %}
+{{super()}}
+<script src="{{ url_for('static', filename='js/info.js') }}"></script>
+{% endblock %}

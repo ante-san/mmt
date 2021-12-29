@@ -1,0 +1,48 @@
+<!-- prettier-ignore -->
+{% extends "sl/templates/sl_template.html" %}
+
+{% block title %}Vehicle Booking Report{% endblock title %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light">
+  <div class="row">
+    <div class="col">
+      <h1 class="mmt-h1">Vehicle Booking</h1>
+      <hr />
+      {% if bookings %}
+      <form action="{{ url_for('dl_report', filename=bookings)}}">
+        <button class="btn btn-success text-center" type="submit">
+          Vehicle Bookings
+        </button>
+      </form>
+      <br />
+      {% endif %} {% if missing %}
+      <form action="{{ url_for('dl_report', filename=missing)}}">
+        <button class="btn btn-danger text-center" type="submit">
+          Missing Instsructions
+        </button>
+      </form>
+      <br />
+      {% endif %}
+      <form
+        action="/vehicle_booking"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <label for="ecase_roster">eCase Roster:</label>
+        <input type="file" class="form-control" name="ecase_roster" required />
+        <br />
+        <button type="submit" class="form-control btn-primary">
+          Run Report
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- prettier-ignore -->
+{% endblock main %}
+
+{% block script %}
+
+{% endblock script %}

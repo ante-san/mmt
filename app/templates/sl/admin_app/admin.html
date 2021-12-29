@@ -1,0 +1,39 @@
+<!-- prettier-ignore -->
+{% extends 'sl/templates/sl_template.html' %}
+
+{% block title %}Admin{% endblock title %}
+
+{% block main %}
+
+<div class="container p-3 mt-3 rounded-3 bg-light">
+  <div class="row">
+    <div class="col">
+      <h1 class="mmt-h1">Admin</h1>
+      <hr />
+      <!-- prettier-ignore -->
+      {% if msg %}
+      <h3>{{ msg }}</h3>
+      {% endif %}
+      <form action="/admin" method="POST" enctype="multipart/form-data">
+        <label for="data_select">Select Data To Upload</label>
+        <select name="data_select" id="cctr" class="form-control">
+          <option value="staff_data">Staff Information Data</option>
+          <option value="rosteron_data">RosterOn Lookup Data</option>
+        </select>
+        <label for="upload_file">Data File:</label>
+        <input type="file" class="form-control" name="upload_file" />
+        <br />
+        <button type="submit" class="form-control btn-primary">
+          Update Data
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- prettier-ignore -->
+{% block scripts %}
+
+{% endblock scripts %}
+
+{% endblock main %}

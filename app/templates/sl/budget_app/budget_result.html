@@ -1,0 +1,195 @@
+{% extends 'sl/templates/sl_template.html' %} {% block title %}Budget Overview{%
+endblock title %} {% block main %}
+
+<div class="container p-3 mt-3 rounded-3 bg-light">
+  <div class="row">
+    <div class="col">
+      <h1 class="mmt-h1">Budget for: {{ return_file["name"] }}</h1>
+      <hr />
+      <ul class="nav nav-tabs">
+        <button class="nav-link active" id="budget-overview-btn">
+          Overview</button
+        ><button class="nav-link" id="budget-stats-btn">Analytics</button
+        ><button class="nav-link" id="budget-calc-btn">Quote Calculator</button>
+      </ul>
+      <div class="budget-overview p-3 mt-3" id="budget-overview">
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <h2>Overview</h2>
+              <hr />
+              <table class="table table-striped table-hover">
+                <tr>
+                  <td>
+                    <strong>Quote Number</strong>
+                  </td>
+                  <td>#{{ return_file["quote_no"] }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Plan Start Date</strong>
+                  </td>
+                  <td>{{ return_file["start_date"] }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Plan End Date</strong>
+                  </td>
+                  <td>{{ return_file["end_date"] }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Cost Centre</strong>
+                  </td>
+                  <td>{{ return_file["cost_center"] }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Remaining Weeks</strong>
+                  </td>
+                  <td>
+                    {{ return_file["remaining_weeks"] }} ({{
+                    return_file["remaining_fortnights"]}} fortnights)
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Total Budget</strong>
+                  </td>
+                  <td>{{ return_file["budget_total"] | currencyFormat }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Total Billed (current plan)</strong>
+                  </td>
+                  <td>{{ return_file["billed_total"] | currencyFormat }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Total Scheduled</strong>
+                  </td>
+                  <td>{{ return_file["scheduled_total"] | currencyFormat }}</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Unallocated Funding</strong>
+                  </td>
+                  <td>{{ return_file["unallocated"] | currencyFormat }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="budget-stats p-3 mt-3" id="budget-stats">
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <h2>Analytics</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="budget-calc p-3 mt-3" id="budget-calc">
+        <div class="container">
+          <div class="row">
+            <div class="col">
+              <!-- Quote Calculator -->
+              <h2>Quote Calculator</h2>
+              <hr />
+              <div>
+                <table>
+                  <tr>
+                    <th>Agreed Codes</th>
+                  </tr>
+                  <!-- generate a list of available codes -->
+                  {% for codes in return_file["agreed_codes"] %}
+                  <tr>
+                    <td>{{ codes }}</td>
+                  </tr>
+                  {% endfor %}
+                </table>
+                <hr />
+              </div>
+              <div class="add_div">
+                <form class="row gy-2 gx-3 align-items-center">
+                  <div class="col-auto">
+                    <label class="visually-hidden" for="code">Code</label>
+                    <div class="input-group">
+                      <div class="input-group-text">Choose Code</div>
+                      <select
+                        class="form-control"
+                        name="code"
+                        id="code"
+                        default="Choose a Code"
+                      >
+                        {% for code in ndis_file %}
+                        <option value="{{ code }}">{{ code }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <label class="visually-hidden" for="hours">Hours</label>
+                    <div class="input-group">
+                      <div class="input-group-text">Hours</div>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="hours"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <label class="visually-hidden" for="occurences"
+                      >Occurences</label
+                    >
+                    <div class="input-group">
+                      <div class="input-group-text">Occurences</div>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="occurences"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <div class="input-group">
+                      <div
+                        class="input-group-text"
+                        id="line_total"
+                        style="width: 8em"
+                      >
+                        $ 0
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      id="submit_add"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </form>
+                <hr />
+              </div>
+              <div class="added_rows"></div>
+              <div class="budget">
+                <span id="return_budget">{{ return_file["unallocated"] }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock main %} {% block scripts %} {{super()}}
+<script src="{{ url_for('static', filename='js/budget_overview.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!-- prettier-ignore -->
+
+{% extends 'sl/templates/sl_template.html' %}
+
+{% block title %}Mentoring Management Tool{% endblock %}
+
+{% block main %}
+<div class="container p-3 mt-3 rounded-3 bg-light">
+  <div class="row">
+    <div class="col">
+      <h1 class="mmt-h1">Mentoring Management Tool</h1>
+      <hr />
+      <div class="index-menu">
+        <a href="/roster_compare">
+          <div class="index-btn" id="index-btn-roster">Roster Comparison</div>
+        </a>
+        <a href="/progress_note">
+          <div class="index-btn" id="index-btn-prog-note">
+            Progress Note Check
+          </div>
+        </a>
+        <a href="/vehicle_booking">
+          <div class="index-btn" id="index-btn-vh-booking">Vehicle Booking</div>
+        </a>
+        <a href="/pv_logsheet">
+          <div class="index-btn" id="index-btn-pv-logsheet">PV Logsheet</div>
+        </a>
+        <a href="/budget">
+          <div class="index-btn" id="index-btn-budget">Budget Overview</div>
+        </a>
+        <a href="/billing_report">
+          <div class="index-btn" id="index-btn-billing">Billing Report</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- prettier-ignore -->
+    {% endblock main %} 
+
+
+{% block script %} 
+
+{% endblock script %}
+  </div>
+</div>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock title %}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/bootstrap.css') }}"
+    />
+  </head>
+  <body>
+    <div class="info-window">
+      <div class="info-header">
+        <button class="btn-info-close">X</button>
+        <h2 class="mmt-h1">Help</h2>
+        <hr />
+      </div>
+      <div class="info-container">
+        <nav class="info-nav">
+          <ul>
+            <li><a href="#roster-comp">Roster Comparison</a></li>
+            <li><a href="#prog-check">Progress Note Check</a></li>
+
+            <li><a href="#vh-book">Vehicle Booking</a></li>
+            <li><a href="#pv-log">PV Logsheet</a></li>
+            <li><a href="#budget-overview">Budget Overview</a></li>
+            <li>
+              <ul class="nav-nested">
+                <li><a href="#budget-overview-sub">Overview</a></li>
+                <li><a href="#budget-analytics-sub">Analytics</a></li>
+                <li><a href="#budget-calc-sub">Quote Calculator</a></li>
+              </ul>
+            </li>
+            <li><a href="#billing-report">Billing Report</a></li>
+            <li>
+              <ul class="nav-nested">
+                <li><a href="#billing-report-run">Running the Report</a></li>
+                <li>
+                  <a href="#billing-report-interpret"
+                    >Interpreting the Report</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <div class="info-text">
+          <h4 id="roster-comp">Roster Comparison</h4>
+          <p>
+            This tool allows you to compare the data in the eCase Roster with
+            the data in RosterOn
+          </p>
+          <p>
+            For the eCase data, run the report "Mentoring Roster Report", through the report generator.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_roster_report.jpg') }}"
+            alt="eCase Roster Report"
+            class="info-img"
+          />
+          <p>
+            For the RosterOn data run the report “Allocations by Employee”,
+            through RosterOn as a "CSV with Headers".
+            <u
+              ><strong
+                >Once the report has been generated make sure you open it in
+                Excel and then re-save it.</strong
+              ></u
+            >
+          </p>
+          <p>
+            As the naming conventions in RosterOn and eCase are different, the
+            tool requires a table to translate between the two. Sometimes you
+            may find that the tools tells you that some staff or clients are
+            missing.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/missing_clients_staff.jpg') }}"
+            alt="Missing Clients/Staff"
+            class="info-img"
+          />
+          <h4 id="prog-check">Progress Note Check</h4>
+          <p>
+            This tool allows you to check who has entered their Progress Notes
+            for shifts worked.
+          </p>
+          <p>
+            For the Roster Data, run the report "Mentoring Roster Report", through the report generator.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_roster_report.jpg') }}"
+            alt="eCase Roster Report"
+            class="info-img"
+          />
+          <p>
+            For the Progress Note data, run the report “Mentoring Progress
+            Notes” through the eCase Report generator. Ensure that you retrieve
+            all progress notes entered from the first date included in your
+            Roster Report.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_prog_note_report.jpg') }}"
+            alt="eCase Progress Note Report"
+            class="info-img"
+          />
+          <p>
+            The report generates a list of “Missing Progress Notes” (where there
+            <i>is no</i> progress note entered by that staff, on that service
+            date, for that client), and “Time Errors” (where the staff
+            <i>has</i> entered a progress note on that day, for that client, but
+            the timings do not match).
+          </p>
+          <p>Use the email button to generate an email to send to the staff.</p>
+          <h4 id="vh-book">Vehicle Booking</h4>
+          <p>
+            This tool allows you to extract the Vehicle Booking information from
+            the information entered in the “Instructions” in the eCase Roster.
+          </p>
+          <p>
+            For the Roster data, run the report in the Roster Maintenance, using
+            the “Excel” button.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_roster_report.jpg') }}"
+            alt="eCase Roster Report"
+            class="info-img"
+          />
+          <p>
+            It will generate 2 reports. One with the Vehicle Booking
+            information:
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/vh_bookings_report.jpg') }}"
+            alt="Vehicle Booking Report"
+            class="info-img"
+          />
+          <p>... and one with the shifts that do not have instructions:</p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/vh_missing_instructions.jpg') }}"
+            alt="Vehicle Booking Missing Instructions"
+            class="info-img"
+          />
+          <h4 id="pv-log">PV Logsheet</h4>
+          <p>
+            This tool will allow you to generate a report to review staff's
+            entered mileage as per their progress notes.
+          </p>
+          <p>
+            For the Progress Note data, run the report “Mentoring Progress
+            Notes” through the eCase Report generator.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_prog_note_report.jpg') }}"
+            alt="eCase Progress Note Report"
+            class="info-img"
+          />
+          <p>
+            The report generated includes all progress notes within the dates
+            included, that have mileage entered, and where the staff has
+            indicated non-fleet vehicle usage.
+          </p>
+          <h4 id="budget-overview">Budget Overview</h4>
+          <p>
+            This tool will show you the agreed, used, scheduled and unallocated
+            funding for a client. This report excludes ABT and Transport related
+            funding when calculating the budget.
+          </p>
+          <p>
+            The Billing File is generated by running the “AAA_NDISByClient”
+            report from the eCase report generator, for the specific client.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_billing_history_report.jpg') }}"
+            alt="eCase Billing History Report"
+            class="info-img"
+          />
+          <p>
+            The Budget File is generated by running the “Quoted Budget” report
+            from the eCase report generator. Ensure that you have the currently
+            active agreement, and enter it into the “Version” field for the
+            report filters.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_quoted_budget_report.jpg') }}"
+            alt="eCase Quoted Budget Report"
+            class="info-img"
+          />
+          <p>
+            The Schedule File is generated by running the “Scheduled Services”
+            report from the eCase report generator, for the specific client.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_scheduled_services_report.jpg') }}"
+            alt="eCase Scheduled Services Report"
+            class="info-img"
+          />
+          <h5 id="budget-overview-sub">Overview</h5>
+          <p>
+            The overview gives you a brief description of the current status of
+            the specific client’s funding.
+          </p>
+          <h5 id="budget-analytics-sub">Analytics</h5>
+          <p>This feature is not yet implemented.</p>
+          <h5 id="budget-calc-sub">Quote Calculator</h5>
+          <p>
+            This tool allows you to add services, using specific NDIS codes, to
+            see how that will impact on the clients budget.
+          </p>
+          <p>
+            Enter the number of hours the client wants the service to be in
+            “Hours”.
+          </p>
+          <p>
+            Enter the number of reoccurring shifts the client would like under
+            “Occurrences”.
+          </p>
+          <h4 id="billing-report">Billing Report</h4>
+          <p>
+            This tool allows you to generate a report that compares the eCase
+            Roster against entered Progress Notes, within information on what
+            shifts are ready to be billed, and which require manual
+            attention/adjustments.
+          </p>
+          <h5 id="billing-report-run">Running the Report</h5>
+          <p>
+            For the Roster Data, run the report "Mentoring Roster Report", through the report generator.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_roster_report.jpg') }}"
+            alt="eCase Roster Report"
+            class="info-img"
+          />
+          <p>
+            For the Progress Note data, run the report “Mentoring Progress
+            Notes” through the eCase Report Generator. Ensure that you retrieve
+            all progress notes entered from the first date included in your
+            Roster Report.
+          </p>
+          <img
+            src=" {{ url_for('static', filename='img/info_imgs/ecase_prog_note_report.jpg') }}"
+            alt="eCase Progress Note Report"
+            class="info-img"
+          />
+          <h5 id="billing-report-interpret">Interpreting the Report</h5>
+          <p>
+            Below is a list of the different headings within the report, and and
+            explanation of the data.
+          </p>
+          <table class="billing-interpret-table">
+            <tr>
+              <td><b>Client</b></td>
+              <td>The full name of the client receiving the service</td>
+            </tr>
+            <tr>
+              <td><b>Description</b></td>
+              <td>The eCase billing code</td>
+            </tr>
+            <tr>
+              <td><b>Program Type</b></td>
+              <td>The type of support provided</td>
+            </tr>
+            <tr>
+              <td><b>Service Date</b></td>
+              <td>The date the service occurred as per the eCase Roster</td>
+            </tr>
+            <tr>
+              <td><b>Start Date Time</b></td>
+              <td>The start date and start time as per the eCase Roster</td>
+            </tr>
+            <tr>
+              <td><b>End Date Time</b></td>
+              <td>The end date and end time as per the eCase Roster</td>
+            </tr>
+            <tr>
+              <td><b>Instructions</b></td>
+              <td>
+                Instructions entered into the eCase Roster by Mentoring Support
+                Leaders. <i>NOTE</i>: this is generally not relevant to billing,
+                however can be useful when addressing errors as it should give
+                an overview of what the shift is supposed to be.
+              </td>
+            </tr>
+            <tr>
+              <td><b>Allocated Carer</b></td>
+              <td>
+                The name of the Support Worker as per allocations in the eCase
+                Roster
+              </td>
+            </tr>
+            <tr>
+              <td><b>StartTime</b></td>
+              <td>
+                The start time of shift as per Support Worker progress note
+              </td>
+            </tr>
+            <tr>
+              <td><b>EndTime</b></td>
+              <td>
+                The end time of shift as per Support Worker progress note.
+                <i>NOTE</i>: This is the end of their rostered shift, NOT
+                face-to-face time or necessarily billable time
+              </td>
+            </tr>
+            <tr>
+              <td><b>Roster Duration</b></td>
+              <td>
+                The time in minutes for the Roster Duration (i.e., the time the
+                staff is rostered and being paid for)
+              </td>
+            </tr>
+            <tr>
+              <td><b>Service Duration</b></td>
+              <td>
+                The time in minutes for the Charge Duration (i.e., the time that
+                is going to be billed)
+              </td>
+            </tr>
+            <tr>
+              <td><b>Notes</b></td>
+              <td>The progress note entered by the Support Worker</td>
+            </tr>
+            <tr>
+              <td><b>Vehicle</b></td>
+              <td>
+                The type of vehicle being used (F = Fleet, H = House, P =
+                Personal / Private, N/0/Blank = No vehicle. <i>NOTE</i>: As this
+                is a free text-field, other letters may appear if the Support
+                Worker enteres something else. If that is the case, please refer
+                to the "Notes" column to verify what the Support Worker entered.
+              </td>
+            </tr>
+            <tr>
+              <td><b>Kms Travelled</b></td>
+              <td>
+                Kms of ABT as entered by Support Worker in Progress Note.
+                <i>NOTE:</i> This does not currently take into account whether
+                the client has agreed to ABT, nor whether the reported Kms are
+                within the agreed amount.
+              </td>
+            </tr>
+            <tr>
+              <td><b>chargeDurationStatus</b></td>
+              <td>
+                Indicators of whether the difference between the Roster Duration
+                and Charge Duration meets expectations based on Type of Vehicle
+                used.
+              </td>
+            </tr>
+            <tr>
+              <td><b>progNoteStatus</b></td>
+              <td>
+                <ul>
+                  <li><i>Accepted</i></li>
+                  <ul>
+                    <li>
+                      Progress Note Date, StartTime, EndTime and Staff match the
+                      roster
+                    </li>
+                  </ul>
+                  <li><i>TimeError</i></li>
+                  <ul>
+                    <li>
+                      Progress Note Date and Staff match roster, but Timings are
+                      incorrect
+                    </li>
+                  </ul>
+                  <li><i>Code Error</i></li>
+                  <ul>
+                    <li>
+                      The billing code does not match the day of week / time of
+                      service
+                    </li>
+                  </ul>
+                  <li><i>Missing</i></li>
+                  <ul>
+                    <li>
+                      The allocated staff member has not entered a progress note
+                      with a service date that match the roster
+                    </li>
+                  </ul>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><b>Billing Status</b></td>
+              <td>
+                Indicates whether the shift is Accepted for billing based on the
+                chargeDurationStatus and progNoteStatus.
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <header class="bg-white" style="height: 20vh; width: 100vw">
+      <img
+        src="{{ url_for('static', filename='img/icons/help_info.png') }}"
+        alt="help_info"
+        class="btn-info-help"
+      />
+    </header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand mmt-h1" href="/">MMT</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/roster_compare">Roster Comparison</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/progress_note">Progress Note Check</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/vehicle_booking">Vehicle Booking</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/pv_logsheet">PV Logsheet</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/budget">Budget Overview</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/billing_report">Billing Report</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <main>{% block main %} {% endblock main %}</main>
+
+    {% block scripts %}{% endblock scripts %}
+    <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/info.js') }}"></script>
+  </body>
+</html>
