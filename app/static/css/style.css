@@ -1,0 +1,207 @@
+.mmt-h1 {
+    color: #d63384;
+}
+  
+.mmt-main-div {
+background-color: rgba(255, 255, 255, 0.55);
+}
+
+.btn-info-close {
+background: none;
+font-weight: bold;
+border: 2px black solid;
+border-radius: 100%;
+padding: 5px 10px;
+margin-left: 90%;
+}
+
+.btn-info-help {
+height: 40px;
+width: 40px;
+margin-left: 95vw;
+margin-top: 5px;
+cursor: pointer;
+}
+
+.btn-start {
+color: var(--bs-light);
+background-color: var(--bs-primary);
+text-decoration: none;
+padding: 10px 20px;
+border-radius: 5px;
+margin-top: 40px;
+margin-bottom: 40px;
+}
+
+.btn-start:hover {
+color: var(--bs-light);
+background-color: #0066ff;
+}
+
+.email-button:link,
+.email-button:visited {
+color: white;
+background-color: #dc3545;
+padding: 5px;
+border-radius: 3px;
+text-decoration: none;
+}
+
+.email-button:hover {
+background-color: #c43341;
+}
+
+.info-window {
+width: 75vw;
+height: 75vh;
+border: 1px black solid;
+box-sizing: border-box;
+padding: 10px;
+background-color: #f9fafb;
+margin: auto;
+left: 0px;
+right: 0px;
+top: 0px;
+bottom: 0px;
+position: absolute;
+display: none;
+flex-direction: column;
+border-radius: 10px;
+z-index: 5;
+}
+
+.info-container {
+width: 70vw;
+height: 60vh;
+margin: auto;
+display: flex;
+flex-direction: row;
+}
+
+.info-text {
+width: 50vw;
+height: auto;
+margin: 5px;
+padding: 5px;
+background-color: #f9fafb;
+overflow: auto;
+}
+
+.info-header {
+width: 70vw;
+height: 15vh;
+margin: auto;
+background-color: #f9fafb;
+}
+
+.info-nav {
+width: 15vw;
+height: auto;
+background-color: #f1f1f1;
+border: 1px black dotted;
+padding-top: 5px;
+border-radius: 5px;
+}
+
+.info-nav li {
+list-style-type: none;
+margin-top: 10px;
+}
+
+.info-nav a {
+text-decoration: none;
+color: #000;
+}
+
+.info-nav a:hover {
+text-decoration: underline;
+color: #d63384;
+}
+
+.info-img {
+display: block;
+margin: auto;
+width: auto;
+padding: 5px;
+}
+
+.prog_note_row {
+opacity: 100%;
+text-decoration: none;
+}
+
+.budget-overview {
+display: inline;
+}
+
+.budget-stats {
+display: none;
+}
+
+.budget-calc {
+display: none;
+}
+
+.billing-interpret-table {
+padding: 5px;
+border: 1px #333 solid;
+}
+
+.billing-interpret-table td,
+tr {
+padding: 5px;
+border: 1px #333 solid;
+}
+
+.index-menu {
+width: 75vw;
+max-width: 1500px;
+margin: auto;
+display: grid;
+grid-template-columns: 25vw 25vw 25vw;
+grid-template-rows: auto;
+box-sizing: border-box;
+overflow: auto;
+}
+
+.index-btn {
+width: 25vw;
+max-width: 300px;
+height: 25vh;
+background-color: #f8f9fa;
+color: #333;
+font-size: 1.5em;
+cursor: pointer;
+text-align: center;
+padding: 10vh 0;
+border-radius: 5px;
+}
+
+.index-btn:hover {
+background-color: #0066ff;
+color: #fff;
+transition: 1s;
+}
+
+.index-menu a {
+text-decoration: none;
+padding: 0;
+margin: 0;
+}
+
+#index-btn-roster {
+}
+#index-btn-prog-note {
+}
+#index-btn-vh-booking {
+}
+#index-btn-pv-logsheet {
+}
+#index-btn-budget {
+}
+#index-btn-billing {
+}
+
+.hidden {
+    display: none;
+}

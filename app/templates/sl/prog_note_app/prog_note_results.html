@@ -8,6 +8,22 @@
         <div class="col">
             <h1 class="mmt-h1">Progress Note Check - Results</h1>
             <hr>
+            <button class="btn btn-warning" style="right : 10px" id="show_bulk_email">Bulk Email</button>
+            <div class="container p-3 mt-3 rounded-3 bg-light hidden" id="bulk_email_form">
+                <div class=" row">
+                    <div class="col">
+                        <h2 class="mmt-h2">Bulk Email Reminders</h2>
+                        <hr>
+                        <label for="username">Outlook Username:</label>
+                        <input type="text" class="form-control" id="username" required/>
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" required/>
+                        <br />
+                        <button class="form-control btn-primary" id="send_email_button">Send</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
             <table class="table table-striped table-hover">
                 {% for i, row in roster.iterrows() %}
                 <tr id="row-{{ i }}" class="prog_note_row">

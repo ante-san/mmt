@@ -1,10 +1,13 @@
+from pandas.io import json
 from app import app
 from flask import render_template, request, redirect, make_response, jsonify, send_from_directory, current_app
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 import mmt_functions as mf
 import pandas as pd
 import datetime
 import time
-import csv
 import os
 
 app.config["UPLOAD_FOLDER"] = "static/generated_data/"
@@ -56,8 +59,6 @@ def progress_note():
 @app.route('/progress_note_result', methods=['GET', 'POST'])
 def progress_note_result():
 
-    start_time = time.time()
-
     if request.method == "POST":
         if request.files['roster_file'].filename != "" and request.files['prog_note_file'].filename != "":
 
@@ -67,8 +68,8 @@ def progress_note_result():
                 request.files["roster_file"])
             prog_note_file = pd.read_csv(request.files["prog_note_file"])
 
-            roster_file = roster_file[roster_file["ProgramType"] != "Group"]
-            roster_file = roster_file[roster_file["ProgramType"] != "2 to 1"]
+            roster_file = roster_file[~roster_file["ProgramType"].str.contains("Group")]
+            roster_file = roster_file[~roster_file["ProgramType"].str.contains("2 to 1")]
 
             roster_file = mf.rosterClean(roster_file, cctr)
             prog_note_file = mf.cleanNotes(prog_note_file)
@@ -89,8 +90,8 @@ def progress_note_result():
             roster_file['ServiceDate'] = roster_file['RosterStartDateTime'].apply(
                 lambda sd: sd.strftime('%d/%m/%Y'))
 
-            complete_time = time.time()
-            print(complete_time - start_time)
+            roster_file.to_csv("app/static/data_files/binu_reminders/latest_reminders.csv")
+
             return render_template('sl/prog_note_app/prog_note_results.html', roster=roster_file)
         else:
             status_text = "Please select all three files"
@@ -264,6 +265,64 @@ def ndis_codes():
         res = make_response(jsonify(ndis_codes))
 
         return res
+
+@app.route('/progress_note_result/send_bulk', methods=["POST"])
+def bulk_email():
+
+    if request.method == "POST":
+
+        user = request.get_json(force=True)
+
+        smtp = smtplib.SMTP('smtp-mail.outlook.com', port='587')
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(user['username'], user['password'])
+
+        reminders = pd.read_csv("app/static/data_files/binu_reminders/latest_reminders.csv")
+
+        missing = reminders[reminders["ValidProgNoteComplete"] == "Missing"]
+
+        time_error = reminders[reminders["ValidProgNoteComplete"] == "Time Error"]
+
+        # Fix these emails
+        # just use the existing template that's in prog_note_result.html
+
+        def generate_email_missing(df):
+            msg = MIMEMultipart()
+            msg['Subject'] = f"Missing Progress Note for {df['ClientFullName']} on {df['ServiceDate']}"
+            body = f"Dear {df['AllocatedStaff']},\
+                \nCould you please complete your Progress Note for {df['ClientFullName']} on {df['ServiceDate']}\
+                \n\
+                \nKind Regards\
+                \nTeam Leaders"
+            msg.attach(MIMEText(body))
+
+            smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
+
+            return
+
+        def generate_email_time_error(df):
+            msg = MIMEMultipart()
+            msg['Subject'] = f"Incorrect Shift times for {df['ClientFullName']} on {df['ServiceDate']}"
+            body = f"Dear {df['AllocatedStaff']},\
+                \nThe shift times in your progress note for {df['ClientFullName']} on {df['ServiceDate']}\
+                does not match what we have scheduled.\
+                \n\
+                \nKind Regards\
+                \nTeam Leaders"
+            msg.attach(MIMEText(body))
+
+            smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
+
+            return
+
+        missing.apply(generate_email_missing, axis=1)
+        time_error.apply(generate_email_time_error, axis=1)      
+
+        res = make_response(jsonify({ 'msg': 'Success' }), 200)
+
+        return res
+
 
 # Function for downloading generated reports
 @app.route('/generated_data/<path:filename>', methods=["GET", "POST"])
