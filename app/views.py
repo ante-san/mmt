@@ -25,19 +25,16 @@ def roster_compare():
 
             cctr = "302 - Mentoring Services"
 
-            eCase_file = pd.read_csv(
-                request.files["ecase_roster"])
+            eCase_file = pd.read_csv(request.files["ecase_roster"])
             rosterOn_file = pd.read_csv(request.files["rosterOn_roster"])
 
             if cctr == "302 - Mentoring Services":
                 rosterOn_file = rosterOn_file[~rosterOn_file["area_desc"].str.contains("(ISS)", case=False, )]
 
-            rosterOn_file.to_csv("rosteron_filtered.csv")
+            rosterOn_file.to_csv("rosteron_filtered.csv", index=False)
 
             eCase_file = mf.rosterClean(eCase_file, cctr)
             rosterOn_file = mf.rosterOnClean(rosterOn_file)
-
-            
 
             output_file = mf.rosterRosterCheck(mf.rosterClean(eCase_file, cctr), rosterOn_file[0])
 
@@ -240,6 +237,11 @@ def admin():
 
             if request.form['data_select'] == 'staff_data':
                 staff_data = pd.read_csv(request.files['upload_file'])
+
+                def create_full_name(df):
+                    return f"{df['FirstName']} {df['LastName']}"
+
+                staff_data["FullName"] = staff_data.apply(create_full_name, axis=1)
                 staff_data.to_csv("app/static/data_files/staff_details.csv", index=False)
                 msg = "Staff Details were succesfully updated."
             elif request.form['data_select'] == 'rosteron_data':
@@ -285,33 +287,41 @@ def bulk_email():
         time_error = reminders[reminders["ValidProgNoteComplete"] == "Time Error"]
 
         # Fix these emails
-        # just use the existing template that's in prog_note_result.html
+        # still need to test to ensure that the formatting is oks
+        # add username as the sender, and df['Email'] as the reciever
 
         def generate_email_missing(df):
             msg = MIMEMultipart()
             msg['Subject'] = f"Missing Progress Note for {df['ClientFullName']} on {df['ServiceDate']}"
-            body = f"Dear {df['AllocatedStaff']},\
-                \nCould you please complete your Progress Note for {df['ClientFullName']} on {df['ServiceDate']}\
+            body = f"Hi {df['AllocatedStaff']},\
+                \nCould you please complete your Progress Note for {df['ClientFullName']} on {df['ServiceDate']}.\
+                \nIf you believe that you have entered this Progress Note, could you please verify that you have entered the correct Service Date.\
+                \nIf you have entered the incorrect Service Date by accident, could you please delete the incorrect Progress Note and re-enter it with the correct Service Date (copy-pasting the content is fine).\
+                \nThank you.\
                 \n\
-                \nKind Regards\
-                \nTeam Leaders"
+                \nKind Regards,\
+                \nCommunity Support Team Leaders"
             msg.attach(MIMEText(body))
 
+            # first email is from address, second is to address
             smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
 
             return
 
         def generate_email_time_error(df):
             msg = MIMEMultipart()
-            msg['Subject'] = f"Incorrect Shift times for {df['ClientFullName']} on {df['ServiceDate']}"
-            body = f"Dear {df['AllocatedStaff']},\
-                \nThe shift times in your progress note for {df['ClientFullName']} on {df['ServiceDate']}\
-                does not match what we have scheduled.\
+            msg['Subject'] = f"Progress Note timing for {df['ClientFullName']} on {df['ServiceDate']}"
+            body = f"Hi {df['AllocatedStaff']},\
+                The times you've entered into the Progress Note for {df['ClientFullName']} on {df['ServiceDate']} does not match what we have in our roster.\
+                \nCould you please verify that you have entered the correct timings. If you did enter the correct timings, could you please confirm the actual times you worked.\
+                \nIf you entered the wrong times by accident (remember to use 24-h time), could you please delete the Progress Note and re-enter it with the correct timings (copy-pasting the content is fine).\
+                \nAThank you.\
                 \n\
-                \nKind Regards\
-                \nTeam Leaders"
+                \nKind Regards,\
+                \nCommunity Support Team Leaders"
             msg.attach(MIMEText(body))
 
+            # first email is from address, second is to address
             smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
 
             return

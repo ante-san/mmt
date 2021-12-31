@@ -3,8 +3,6 @@ let show_bulk_email = document.getElementById("show_bulk_email")
 let bulk_email_form = document.getElementById("bulk_email_form")
 
 show_bulk_email.addEventListener("click", () => {
-    console.log(bulk_email_form );
-    
     bulk_email_form.classList.contains("hidden") ? bulk_email_form.classList.remove("hidden") : bulk_email_form.classList.add("hidden"); 
 })
 

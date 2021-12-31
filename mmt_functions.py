@@ -501,8 +501,6 @@ def rosterOnClean(roster):
     # Converting dates to DateTime objects for consistency
     # note that when RosterOn creates it's report, "finish_time" is actually
     # the start time, and "role_desc" is the finish time
-    
-    
     df_ro["finish_time"] = pd.to_datetime(df_ro["finish_time"], format="%d/%m/%Y %H:%M")
     df_ro["role_desc"] = pd.to_datetime(df_ro["role_desc"], format="%d/%m/%Y %H:%M")
 
@@ -521,62 +519,40 @@ def rosterOnClean(roster):
 
     # make sure we've only got digits before converting to int,
     # cause varchar10000, hehehehehe
-    df_staff = df_staff[df_staff["PayrollID"].apply(
-        lambda id: str(id).isdigit())]
+    df_staff = df_staff[df_staff["PayrollID"].apply(lambda id: str(id).isdigit())]
 
     # ensure that PayrollID is an int
     df_staff["PayrollID"] = df_staff["PayrollID"].astype("int")
 
     # merge staff's eCase names based on PayrollID
-    df_ro = pd.merge(df_ro, df_staff[['PayrollID', 'FullName']],
-                     left_on='emp_no', right_on='PayrollID', how='left')
+    df_ro = pd.merge(df_ro, df_staff[['PayrollID', 'FullName']], left_on='emp_no', right_on='PayrollID', how='left')
 
     # read in client's eCase name to translate between RosterOn and eCase data
     df_client = pd.read_csv('app/static/data_files/minda_clients.csv')
 
     # merge based on RosterOn id
-    df_ro = pd.merge(df_ro, df_client[['RosteronID', 'FullNameClient', 'eCase ID']],
-                     left_on='area_id', right_on='RosteronID', how='left')
+    df_ro = pd.merge(df_ro, df_client[['RosteronID', 'FullNameClient', 'eCase ID']], left_on='area_id', right_on='RosteronID', how='left')
 
     # record clients and staff who are missing so that they can be added in the future
     time = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
 
     # for some reason it seems to add spaces instead of NaN values
-    df_ro["FullNameClient"] = df_ro["FullNameClient"].str.replace(" ", "")
+    df_ro["FullNameClient"] = df_ro["FullNameClient"].str.strip(" ")
 
-    df_missing_clients = df_ro[df_ro["FullNameClient"] == ""]
-    df_missing_clients = df_missing_clients[df_missing_clients["area_desc"]
-                                            != "Mentoring - GROUP - LSDM"]
-    df_missing_clients = df_missing_clients[df_missing_clients["area_desc"]
-                                            != "Mentoring Services - CCtr 302"]
-    df_missing_clients.to_csv(
-        f"app/static/generated_data/roster_check/missing_clients/missing_clients{str(time)}.csv", index=False)
+    df_missing_clients = df_ro[(df_ro["FullNameClient"] == "") | (df_ro["FullNameClient"] == " ") | (df_ro["FullNameClient"].isna())]
+    df_missing_clients = df_missing_clients[df_missing_clients["area_desc"] != "Mentoring - GROUP - LSDM"]
+    df_missing_clients = df_missing_clients[df_missing_clients["area_desc"] != "Mentoring Services - CCtr 302"]
+    df_missing_clients.to_csv(f"app/static/generated_data/roster_check/missing_clients/missing_clients{str(time)}.csv", index=False)
 
     df_missing_staff = df_ro[df_ro["FullName"].isna()]
-    df_missing_staff.to_csv(
-        f"app/static/generated_data/roster_check/missing_staff/missing_staff{str(time)}.csv", index=False)
+    df_missing_staff.to_csv(f"app/static/generated_data/roster_check/missing_staff/missing_staff{str(time)}.csv", index=False)
 
     # drop staff and clients that are missing so that the script can continue running
     df_ro = df_ro[df_ro["FullNameClient"] != ""]
     df_ro = df_ro[df_ro["FullName"] != ""]
 
-    ###########################################################################################
-    #   This can be done faster
-    ###########################################################################################
-    # create unique shift ID for shits (client name + start date time + end date time + staff)
-    # df_result = pd.DataFrame()
-    # for i, row in df_ro.iterrows():
-    #     row['shift_ID'] = row['FullNameClient'] + \
-    #         str(row['finish_time']) + \
-    #         str(row['role_desc']) + row['FullName']
-
-    #     df_result = df_result.append(row)
-    # df_ro = df_result
-
-    print(df_ro)
-
     def createShiftID(df):
-        return str(df['eCase ID']) + str(df['finish_time']) + str(df['role_desc']) + df['FullName']
+        return str(df['eCase ID']) + str(df['finish_time']) + str(df['role_desc']) + str(df['FullName'])
 
     df_ro["shiftID_Complete"] = df_ro.apply(createShiftID, axis=1)
 
@@ -592,60 +568,33 @@ def rosterRosterCheck(ec, ro):
     df_ec["RosterOrigin"] = "eCase"
     df_ro["RosterOrigin"] = "RosterOn"
 
-    df_ro = df_ro.rename(columns={"FullNameClient": "ClientFullName",
-                                  "finish_time": "RosterStartDateTime", "role_desc": "RosterEndDateTime", "FullName": "AllocatedStaff"})
+    df_ro = df_ro.rename(columns={"FullNameClient": "ClientFullName", "finish_time": "RosterStartDateTime", "role_desc": "RosterEndDateTime", "FullName": "AllocatedStaff"})
 
     df_ro = df_ro.drop_duplicates("shiftID_Complete", keep="first")
     df_ec = df_ec.drop_duplicates("shiftID_Complete", keep="first")
 
     ro_shifts = df_ro["shiftID_Complete"].tolist()
-    ro_shifts_hash = {ro_shifts[i]: 0 for i in range(0, len(ro_shifts), 1)}
 
     ec_shifts = df_ec["shiftID_Complete"].tolist()
-    ec_shifts_hash = {ec_shifts[i]: 0 for i in range(0, len(ec_shifts), 1)}
-
-    ############################################################################################
-    #   This can be done faster
-    ############################################################################################
 
     def checkRoster(df, list, msg):
         return True if df["shiftID_Complete"] in list else msg
 
-    df_ec_copy = df_ec.copy()
-    df_ro_copy = df_ro.copy()
+    df_ec["RosterStatus"] = df_ec.apply(lambda df: checkRoster(df, ro_shifts, "Not found in RosterOn"), axis=1)
+    df_ro["RosterStatus"] = df_ro.apply(lambda df: checkRoster(df, ec_shifts, "Not found in eCase"), axis=1)
 
-    df_ec_copy["RosterStatus"] = df_ec_copy.apply(lambda df: checkRoster(df, ro_shifts, "Not found in RosterOn"), axis=1)
-    df_ro_copy["RosterStatus"] = df_ro_copy.apply(lambda df: checkRoster(df, ec_shifts, "Not found in eCase"), axis=1)
+    df_ec = df_ec[["ClientFullName", "AllocatedStaff", "RosterStartDateTime", "RosterEndDateTime", "RosterStatus", "RosterOrigin"]]
+    df_ro = df_ro[["ClientFullName", "AllocatedStaff", "RosterStartDateTime", "RosterEndDateTime", "RosterStatus", "RosterOrigin"]]
+    df_ec = df_ec.append(df_ro)
+    df_ec = df_ec[df_ec["RosterStatus"] != True]
 
-    df_ec_copy = df_ec_copy[["ClientFullName", "AllocatedStaff", "RosterStartDateTime", "RosterEndDateTime", "RosterStatus", "RosterOrigin"]]
-    df_ro_copy = df_ro_copy[["ClientFullName", "AllocatedStaff", "RosterStartDateTime", "RosterEndDateTime", "RosterStatus", "RosterOrigin"]]
-    df_ec_copy = df_ec_copy.append(df_ro_copy)
-    df_ec_copy[df_ec_copy["RosterStatus"] != True].to_csv("test_out_rostercheck.csv")
-
-    df_result = pd.DataFrame()
-    for i, row in df_ec.iterrows():
-        if row["shiftID_Complete"] not in ro_shifts_hash:
-
-            row["RosterStatus"] = "Not found in RosterOn"
-
-            df_result = df_result.append(row)
-
-    for i, row in df_ro.iterrows():
-        if row["shiftID_Complete"] not in ec_shifts_hash:
-
-            row["RosterStatus"] = "Not found in eCase"
-
-            df_result = df_result.append(row)
-
-    df_result = df_result[["ClientFullName", "AllocatedStaff", "RosterStartDateTime", "RosterEndDateTime", "RosterStatus", "RosterOrigin"]]
-
-    df_result = df_result.sort_values(by="ClientFullName", ascending=True)
+    df_ec.sort_values(["ClientFullName", "RosterStartDateTime"], inplace=True)
 
     time = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
 
     filename_result = f"roster_check/report/roster_check_{time}.csv"
 
-    df_result.to_csv(f"app/static/generated_data/{filename_result}")
+    df_ec.to_csv(f"app/static/generated_data/{filename_result}", index=False)
 
     return filename_result
 

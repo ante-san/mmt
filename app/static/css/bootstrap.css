@@ -308,6 +308,8 @@ svg {
 table {
   caption-side: bottom;
   border-collapse: collapse;
+  border-width: 0px;
+  border: none;
 }
 
 caption {
