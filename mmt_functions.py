@@ -456,12 +456,13 @@ def rosterClean_deprecated(roster, cctr):
 # running a report using the YF_BillingForcastAccruals view within the report generator. It will
 # also replace the addChargeDuration function as this view contains the charge duration already.
 # I'm keeping the old functions in the code as they may be needed at some point.
-def rosterClean(roster, cctr):
+def rosterClean(roster, cctr=0):
     df_roster = roster
 
     df_roster.to_csv("roster_check.csv")
 
-    df_roster = df_roster[df_roster['CostCenter'] == cctr]
+    if cctr != 0:
+        df_roster = df_roster[df_roster['CostCenter'] == cctr]
     df_roster = df_roster[df_roster['Status'] != 'Cancelled']
 
     df_roster["RosterStartDateTime"] = pd.to_datetime(df_roster["RosterStartDateTime"])
@@ -480,10 +481,10 @@ def rosterClean(roster, cctr):
     df_roster["shiftID_Complete"] = df_roster.apply(lambda df: rosterSK(df, "complete"), axis=1)
     df_roster["shiftID_Date"] = df_roster.apply(lambda df: rosterSK(df, "date"), axis=1)
 
-    df_staff_detail = pd.read_csv("app/static/data_files/staff_details.csv")
+    # df_staff_detail = pd.read_csv("app/static/data_files/staff_details.csv")
 
-    df_roster = pd.merge(df_roster, df_staff_detail[['PayrollID', 'FullName', 'Email', 'FirstName', 'LastName']], on='PayrollID', how='left')
-    df_roster = df_roster.drop_duplicates('shiftID_Complete', keep='last')
+    # df_roster = pd.merge(df_roster, df_staff_detail[['PayrollID', 'FullName', 'Email', 'FirstName', 'LastName']], on='PayrollID', how='left')
+    # df_roster = df_roster.drop_duplicates('shiftID_Complete', keep='last')
 
     df_roster['chargeDiff'] = df_roster['RosterDuration'] - df_roster['ServiceDuration']
 

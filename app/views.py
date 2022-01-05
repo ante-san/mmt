@@ -23,20 +23,13 @@ def roster_compare():
     if request.method == "POST":
         if request.files["ecase_roster"].filename != "" and request.files["rosterOn_roster"].filename != "":
 
-            cctr = "302 - Mentoring Services"
-
             eCase_file = pd.read_csv(request.files["ecase_roster"])
             rosterOn_file = pd.read_csv(request.files["rosterOn_roster"])
 
-            if cctr == "302 - Mentoring Services":
-                rosterOn_file = rosterOn_file[~rosterOn_file["area_desc"].str.contains("(ISS)", case=False, )]
-
-            rosterOn_file.to_csv("rosteron_filtered.csv", index=False)
-
-            eCase_file = mf.rosterClean(eCase_file, cctr)
+            eCase_file = mf.rosterClean(eCase_file)
             rosterOn_file = mf.rosterOnClean(rosterOn_file)
 
-            output_file = mf.rosterRosterCheck(mf.rosterClean(eCase_file, cctr), rosterOn_file[0])
+            output_file = mf.rosterRosterCheck(eCase_file, rosterOn_file[0])
 
             return render_template("sl/roster_app/roster_compare.html", output_file=output_file, missing_clients=rosterOn_file[1], missing_staff=rosterOn_file[2])
         else:
