@@ -60,6 +60,7 @@ def progress_note_result():
 
             roster_file = roster_file[~roster_file["ProgramType"].str.contains("Group")]
             roster_file = roster_file[~roster_file["ProgramType"].str.contains("2 to 1")]
+            roster_file.dropna(subset=["AllocatedStaff"], inplace=True)
 
             roster_file = mf.rosterClean(roster_file, cctr)
             prog_note_file = mf.cleanNotes(prog_note_file)
@@ -280,7 +281,7 @@ def bulk_email():
         time_error = reminders[reminders["ValidProgNoteComplete"] == "Time Error"]
 
         # Fix these emails
-        # still need to test to ensure that the formatting is oks
+        # still need to test to ensure that the formatting is ok
         # add username as the sender, and df['Email'] as the reciever
 
         def generate_email_missing(df):
@@ -288,7 +289,9 @@ def bulk_email():
             msg['Subject'] = f"Missing Progress Note for {df['ClientFullName']} on {df['ServiceDate']}"
             body = f"Hi {df['AllocatedStaff']},\
                 \nCould you please complete your Progress Note for {df['ClientFullName']} on {df['ServiceDate']}.\
+                \n\
                 \nIf you believe that you have entered this Progress Note, could you please verify that you have entered the correct Service Date.\
+                \n\
                 \nIf you have entered the incorrect Service Date by accident, could you please delete the incorrect Progress Note and re-enter it with the correct Service Date (copy-pasting the content is fine).\
                 \nThank you.\
                 \n\
@@ -296,7 +299,7 @@ def bulk_email():
                 \nCommunity Support Team Leaders"
             msg.attach(MIMEText(body))
 
-            # first email is from address, second is to address
+            # first email is from (sender) address, second is to (receiver) address
             smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
 
             return
@@ -305,10 +308,12 @@ def bulk_email():
             msg = MIMEMultipart()
             msg['Subject'] = f"Progress Note timing for {df['ClientFullName']} on {df['ServiceDate']}"
             body = f"Hi {df['AllocatedStaff']},\
-                The times you've entered into the Progress Note for {df['ClientFullName']} on {df['ServiceDate']} does not match what we have in our roster.\
+                \nThe times you've entered into the Progress Note for {df['ClientFullName']} on {df['ServiceDate']} does not match what we have in our roster.\
+                \n\
                 \nCould you please verify that you have entered the correct timings. If you did enter the correct timings, could you please confirm the actual times you worked.\
+                \n\
                 \nIf you entered the wrong times by accident (remember to use 24-h time), could you please delete the Progress Note and re-enter it with the correct timings (copy-pasting the content is fine).\
-                \nAThank you.\
+                \nThank you.\
                 \n\
                 \nKind Regards,\
                 \nCommunity Support Team Leaders"
