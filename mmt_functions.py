@@ -295,7 +295,7 @@ def cleanNotes(prog_notes):
 
     # Extract Km travelled
     df_progNote['Kms Travelled'] = df_progNote['Notes'].apply(
-        lambda st: st[st.find("TRAVE")+6:st.find("PERSON")])
+        lambda st: st[st.find("TRAVELE")+6:st.find("PERSON")])
 
     #############################################################################
     #   This can probably be improved with regex
@@ -456,12 +456,14 @@ def rosterClean_deprecated(roster, cctr):
 # running a report using the YF_BillingForcastAccruals view within the report generator. It will
 # also replace the addChargeDuration function as this view contains the charge duration already.
 # I'm keeping the old functions in the code as they may be needed at some point.
-def rosterClean(roster, cctr=0):
+def rosterClean(roster, cctr=""):
     df_roster = roster
 
     df_roster.to_csv("roster_check.csv")
 
-    if cctr != 0:
+    print(f"This is the cost centre: {cctr}")
+
+    if cctr != "":
         df_roster = df_roster[df_roster['CostCenter'] == cctr]
     df_roster = df_roster[df_roster['Status'] != 'Cancelled']
 
