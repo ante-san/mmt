@@ -52,34 +52,30 @@ def progress_note_result():
     if request.method == "POST":
         if request.files['roster_file'].filename != "" and request.files['prog_note_file'].filename != "":
 
-            cctr = request.form["cctr"]
-
-            roster_file = pd.read_csv(
-                request.files["roster_file"])
+            roster_file = pd.read_csv(request.files["roster_file"])
             prog_note_file = pd.read_csv(request.files["prog_note_file"])
 
             roster_file = roster_file[~roster_file["ProgramType"].str.contains("Group")]
             roster_file = roster_file[~roster_file["ProgramType"].str.contains("2 to 1")]
             roster_file.dropna(subset=["AllocatedStaff"], inplace=True)
 
-            roster_file = mf.rosterClean(roster_file, cctr)
+            roster_file = mf.rosterClean(roster_file)
             prog_note_file = mf.cleanNotes(prog_note_file)
+
+            roster_file.to_csv('roster_check.csv')
 
             roster_file = mf.progressNoteCheck(roster_file, prog_note_file)
 
             today = datetime.date.today()
-            roster_file = roster_file = roster_file[roster_file["RosterStartDateTime"] <= pd.to_datetime((
-                datetime.date.today() - datetime.timedelta(days=1)))]
+            roster_file = roster_file = roster_file[roster_file["RosterStartDateTime"] <= pd.to_datetime((datetime.date.today() - datetime.timedelta(days=1)))]
 
             binu_reminders = roster_file[roster_file["ValidProgNoteComplete"] == "Missing"]
             date_today = datetime.datetime.now().strftime('%y%m%d_%H%M%S')
-            binu_reminders.to_csv(
-                f'app/static/data_files/binu_reminders/binu_reminders_{date_today}.csv')
+            binu_reminders.to_csv(f'app/static/data_files/binu_reminders/binu_reminders_{date_today}.csv')
 
             roster_file = roster_file[roster_file["ValidProgNoteComplete"] != "Accepted"]
             roster_file = roster_file.sort_values("ValidProgNoteComplete")
-            roster_file['ServiceDate'] = roster_file['RosterStartDateTime'].apply(
-                lambda sd: sd.strftime('%d/%m/%Y'))
+            roster_file['ServiceDate'] = roster_file['RosterStartDateTime'].apply(lambda sd: sd.strftime('%d/%m/%Y'))
 
             roster_file.to_csv("app/static/data_files/binu_reminders/latest_reminders.csv")
 
@@ -172,14 +168,12 @@ def budget_result():
 
             print('computing data')
 
-            cctr = request.form["cctr"]
-
             billedFile = request.files["billed"]
             budgetFile = request.files["budget"]
             scheduledFile = request.files["scheduled"]
 
             return_file = mf.budgetCheck(
-                billedFile, budgetFile, scheduledFile, cctr)
+                billedFile, budgetFile, scheduledFile)
 
             ndis_codes = pd.read_csv(
                 'app/static/data_files/mentoring_codes.csv')
@@ -202,12 +196,11 @@ def billing_report():
 
         if request.files['roster_file'].filename != "" and request.files['prog_file'].filename != "":
 
-            cctr = request.form["cctr"]
             roster_file = pd.read_csv(request.files["roster_file"])
             #charge_file = pd.read_csv(request.files["charge_file"])
             prog_file = pd.read_csv(request.files["prog_file"])
 
-            roster_file = mf.rosterClean(roster_file, cctr)
+            roster_file = mf.rosterClean(roster_file)
             #roster_file = mf.addChargeDuration(roster_file, charge_file)
             prog_file = mf.cleanNotes(prog_file)
             roster_file = mf.billingStatus(roster_file, prog_file)
@@ -267,22 +260,18 @@ def bulk_email():
 
     if request.method == "POST":
 
-        user = request.get_json(force=True)
+        data = request.get_json(force=True)
 
         smtp = smtplib.SMTP('smtp-mail.outlook.com', port='587')
         smtp.ehlo()
         smtp.starttls()
-        smtp.login(user['username'], user['password'])
+        smtp.login(data['username'], data['password'])
 
         reminders = pd.read_csv("app/static/data_files/binu_reminders/latest_reminders.csv")
 
         missing = reminders[reminders["ValidProgNoteComplete"] == "Missing"]
 
         time_error = reminders[reminders["ValidProgNoteComplete"] == "Time Error"]
-
-        # Fix these emails
-        # still need to test to ensure that the formatting is ok
-        # add username as the sender, and df['Email'] as the reciever
 
         def generate_email_missing(df):
             msg = MIMEMultipart()
@@ -300,7 +289,7 @@ def bulk_email():
             msg.attach(MIMEText(body))
 
             # first email is from (sender) address, second is to (receiver) address
-            smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
+            smtp.sendmail(data['username'], df['Email'], msg.as_string())
 
             return
 
@@ -320,7 +309,7 @@ def bulk_email():
             msg.attach(MIMEText(body))
 
             # first email is from address, second is to address
-            smtp.sendmail('asandgren@minda.asn.au', 'asandgren@minda.asn.au', msg.as_string())
+            smtp.sendmail(data['username'], df['Email'], msg.as_string())
 
             return
 

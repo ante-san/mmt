@@ -332,13 +332,14 @@ def cleanNotes(prog_notes):
 
     return df_progNote
 
-def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
-
-    cost_center = cctr
+def budgetCheck(billed_fname, budget_fname, scheduled_fname):
 
     df_budget = pd.read_csv(budget_fname)
+    df_budget = df_budget[(df_budget["CostCenter"] == "302 - Mentoring Services") | (df_budget["CostCenter"] == "194 - In Home Support")]
     df_billed = pd.read_csv(billed_fname)
+    df_billed = df_billed[(df_billed["ServiceCostCenter"] == "302 - Mentoring Services") | (df_billed["ServiceCostCenter"] == "194 - In Home Support")]
     df_scheduled = pd.read_csv(scheduled_fname)
+    df_scheduled = df_scheduled[(df_scheduled["CostCenter"] == "302 - Mentoring Services") | (df_scheduled["CostCenter"] == "194 - In Home Support")]
 
     # Getting budget value and start date of plan
     df_budget["StartDate"] = pd.to_datetime(df_budget["StartDate"])
@@ -346,12 +347,10 @@ def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
     start_date = df_budget["StartDate"].min()
     end_date = df_budget["EndDate"].max()
     end_date = df_budget["EndDate"].max()
-    remaining_weeks = round(
-        (abs(pd.to_datetime(dt.date.today())-end_date).days)/7, 2)
+    remaining_weeks = round((abs(pd.to_datetime(dt.date.today())-end_date).days)/7, 2)
     remaining_fortnights = remaining_weeks / 2
     name = df_budget["ClientName"].min()
     quote_no = df_budget["Version"].max()
-    df_budget = df_budget[df_budget["CostCenter"] == cost_center]
     df_budget = df_budget.drop_duplicates(subset="ServicePlanOrder")
 
     
@@ -366,7 +365,6 @@ def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
     # Getting billed amount and last bill date
     df_billed["ServiceDate"] = pd.to_datetime(df_billed["ServiceDate"])
     df_billed = df_billed[df_billed["ServiceDate"] >= start_date]
-    df_billed = df_billed[df_billed["ServiceCostCenter"] == cost_center]
     last_bill = df_billed["ServiceDate"].max()
     billed_total = round(df_billed["TotalNetCharge"].sum(), 2)
 
@@ -376,10 +374,7 @@ def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
     # completed
     if not pd.isnull(last_bill):
         df_scheduled = df_scheduled[df_scheduled["PlannedDate"] > last_bill]
-    df_scheduled = df_scheduled[df_scheduled["CostCenter"]
-                                == "302 - Mentoring Services"]
-    df_scheduled = df_scheduled[df_scheduled["ActiveStatus"]
-                                == "Currently Active"]
+    df_scheduled = df_scheduled[df_scheduled["ActiveStatus"] == "Currently Active"]
     scheduled_total = round(df_scheduled["UnitPriceTotal"].sum(), 2)
 
     # Calculate Available Funds
@@ -390,7 +385,6 @@ def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
         "quote_no": quote_no,
         "start_date": start_date,
         "end_date": end_date,
-        "cost_center": cost_center,
         "remaining_weeks": remaining_weeks,
         "remaining_fortnights": remaining_fortnights,
         "budget_total": budget_total,
@@ -408,23 +402,18 @@ def budgetCheck(billed_fname, budget_fname, scheduled_fname, cctr):
 # this function is used for shifts against progress notes,
 # and does not work when information on vehicle usage and mileage
 # is required
-def rosterClean_deprecated(roster, cctr):
+def rosterClean_deprecated(roster):
     print('Starting Roster Clean Up')
     df_roster = roster
-    cost_center = cctr
 
     # Filtering for Mentoring shifts and excluding cancelled shifts as we do
     # not expect progress notes for those, and dropping unallocated shifts
-    df_roster = df_roster[df_roster['Cost Center'] == cost_center]
     df_roster = df_roster[df_roster['Status'] != 'Cancelled']
 
     # converting the dates into datetime to ensure consistency when comparing
-    df_roster['Start Date Time'] = pd.to_datetime(
-        df_roster['Start Date Time'], format='%Y/%m/%d %H:%M')
-    df_roster['End Date Time'] = pd.to_datetime(
-        df_roster['End Date Time'], format='%Y/%m/%d %H:%M')
-    df_roster['Service Date'] = pd.to_datetime(
-        df_roster['Start Date Time'], format='%Y/%m/%d').dt.date
+    df_roster['Start Date Time'] = pd.to_datetime(df_roster['Start Date Time'], format='%Y/%m/%d %H:%M')
+    df_roster['End Date Time'] = pd.to_datetime(df_roster['End Date Time'], format='%Y/%m/%d %H:%M')
+    df_roster['Service Date'] = pd.to_datetime(df_roster['Start Date Time'], format='%Y/%m/%d').dt.date
 
     def rosterSK(df, type):
         return f"{df['Client'] + str(df['Start Date Time']) + str(df['End Date Time']) + str(df['Allocated Carer'])}" if type=="complete" else f"{df['Client'] + str(df['Service Date']) + str(df['Allocated Carer'])}"
@@ -444,8 +433,7 @@ def rosterClean_deprecated(roster, cctr):
     df_staff_detail = pd.read_csv(
         "app/static/data_files/staff_details.csv")
 
-    df_roster = pd.merge(
-        df_roster, df_staff_detail[['FullName', 'Email', 'FirstName', 'LastName']], left_on='Allocated Carer', right_on='FullName', how='left')
+    df_roster = pd.merge(df_roster, df_staff_detail[['FullName', 'Email', 'FirstName', 'LastName']], left_on='Allocated Carer', right_on='FullName', how='left')
     df_roster = df_roster.drop_duplicates('shiftID_Complete', keep='last')
 
     return df_roster
@@ -456,16 +444,10 @@ def rosterClean_deprecated(roster, cctr):
 # running a report using the YF_BillingForcastAccruals view within the report generator. It will
 # also replace the addChargeDuration function as this view contains the charge duration already.
 # I'm keeping the old functions in the code as they may be needed at some point.
-def rosterClean(roster, cctr=""):
+def rosterClean(roster):
     df_roster = roster
 
     df_roster.to_csv("roster_check.csv")
-
-    print(f"This is the cost centre: {cctr}")
-
-    if cctr != "":
-        df_roster = df_roster[df_roster['CostCenter'] == cctr]
-    df_roster = df_roster[df_roster['Status'] != 'Cancelled']
 
     df_roster["RosterStartDateTime"] = pd.to_datetime(df_roster["RosterStartDateTime"])
     df_roster["RosterEndDateTime"] = pd.to_datetime(df_roster["RosterEndDateTime"])
@@ -483,10 +465,10 @@ def rosterClean(roster, cctr=""):
     df_roster["shiftID_Complete"] = df_roster.apply(lambda df: rosterSK(df, "complete"), axis=1)
     df_roster["shiftID_Date"] = df_roster.apply(lambda df: rosterSK(df, "date"), axis=1)
 
-    # df_staff_detail = pd.read_csv("app/static/data_files/staff_details.csv")
+    df_staff_detail = pd.read_csv("app/static/data_files/staff_details.csv")
 
-    # df_roster = pd.merge(df_roster, df_staff_detail[['PayrollID', 'FullName', 'Email', 'FirstName', 'LastName']], on='PayrollID', how='left')
-    # df_roster = df_roster.drop_duplicates('shiftID_Complete', keep='last')
+    df_roster = pd.merge(df_roster, df_staff_detail[['PayrollID', 'FullName', 'Email', 'FirstName', 'LastName']], on='PayrollID', how='left')
+    df_roster = df_roster.drop_duplicates('shiftID_Complete', keep='last')
 
     df_roster['chargeDiff'] = df_roster['RosterDuration'] - df_roster['ServiceDuration']
 
@@ -613,8 +595,7 @@ def progressNoteCheck(roster_file, prog_note_file):
     valid_note = df_prog_note["shiftID_Complete"].tolist()
     valid_note_date = df_prog_note["shiftID_Date"].tolist()
     valid_note_hash = {valid_note[i]: 0 for i in range(0, len(valid_note), 1)}
-    valid_note_date_hash = {
-        valid_note_date[i]: 0 for i in range(0, len(valid_note_date), 1)}
+    valid_note_date_hash = {valid_note_date[i]: 0 for i in range(0, len(valid_note_date), 1)}
 
     def checkProgNotes(df):
         if df["shiftID_Complete"] in valid_note_hash:
